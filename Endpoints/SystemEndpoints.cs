@@ -11,7 +11,7 @@ public static class SystemEndpoints
         var system = app.MapGroup("/system")
             .WithTags("System");
 
-        system.MapGet("/api-version", () => Results.Ok("1.5.2 retail"))
+        system.MapGet("/api-version", () => Results.Text("1.5.2 retail", "text/plain"))
             .WithName("GetApiVersion");
 
         system.MapGet("/information", () => Results.Ok(new

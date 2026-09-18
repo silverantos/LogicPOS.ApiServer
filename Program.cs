@@ -29,16 +29,13 @@ public class VatRate
     public decimal Rate { get; set; }
 }
 
-public static class Program
+public partial class Program
 {
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // 1. Configurar Kestrel para http://127.0.0.1:5001 (exatamente como na API original)
-        builder.WebHost.UseUrls("http://127.0.0.1:5001");
-
-        // 2. Configurar a Base de Dados SQLite
+        // 1. Configurar a Base de Dados SQLite
         builder.Configuration["ConnectionStrings:DefaultConnection"] = "Data Source=logicpos.db";
 
         builder.Services.AddDbContext<AppDbContext>(options =>
@@ -49,7 +46,7 @@ public static class Program
 
         var app = builder.Build();
 
-        // 3. Ativar Scalar na Raiz (Interface visual igual à original)
+        // 2. Ativar Scalar na Raiz (Interface visual igual à original)
         app.UseSwagger(options =>
         {
             options.RouteTemplate = "openapi/{documentName}/swagger.json";
