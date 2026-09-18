@@ -41,6 +41,7 @@ public sealed class ApiDocument
     public decimal TotalTax { get; set; }
     public decimal TotalFinal { get; set; }
     public decimal TotalPaid { get; set; }
+    public bool IsDeleted { get; set; }
 
     public ApiDocumentStatus Status { get; set; } = ApiDocumentStatus.Draft;
     public string? CancelReason { get; set; }
@@ -83,6 +84,7 @@ public sealed class ApiDocumentDetail
     public decimal TotalDiscount { get; set; }
     public decimal TotalTax { get; set; }
     public decimal TotalFinal { get; set; }
+    public bool IsDeleted { get; set; }
     public string? SerialNumber { get; set; }
     public string? Warehouse { get; set; }
 }

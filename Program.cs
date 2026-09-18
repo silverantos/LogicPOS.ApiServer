@@ -114,13 +114,16 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var databaseInitializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializer>();
-    await databaseInitializer.InitializeAsync();
+    var initializationResult = await databaseInitializer.InitializeAsync();
 
-    var bootstrapUserSeeder = scope.ServiceProvider.GetRequiredService<BootstrapUserSeeder>();
-    await bootstrapUserSeeder.SeedAsync();
+    if (!initializationResult.UsesExistingLogicPosSchema)
+    {
+        var bootstrapUserSeeder = scope.ServiceProvider.GetRequiredService<BootstrapUserSeeder>();
+        await bootstrapUserSeeder.SeedAsync();
 
-    var documentTypeSeeder = scope.ServiceProvider.GetRequiredService<DocumentTypeSeeder>();
-    await documentTypeSeeder.SeedAsync();
+        var documentTypeSeeder = scope.ServiceProvider.GetRequiredService<DocumentTypeSeeder>();
+        await documentTypeSeeder.SeedAsync();
+    }
 }
 
 app.UseExceptionHandler(errorApp =>

@@ -12,6 +12,7 @@ public sealed class ApiOrder
     public Guid Id { get; set; }
     public Guid TableId { get; set; }
     public ApiOrderStatus Status { get; set; } = ApiOrderStatus.Open;
+    public bool IsDeleted { get; set; }
     public string? DeleteReason { get; set; }
     public string Notes { get; set; } = string.Empty;
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
@@ -28,6 +29,7 @@ public sealed class ApiOrderTicket
 
     // Set only for tickets created by SplitTicket; the number of people the client should divide this ticket's total among.
     public int? SplittersNumber { get; set; }
+    public bool IsDeleted { get; set; }
 
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
@@ -44,6 +46,7 @@ public sealed class ApiOrderDetail
     public decimal Price { get; set; }
     public decimal Discount { get; set; }
     public decimal Vat { get; set; }
+    public bool IsDeleted { get; set; }
     public string Notes { get; set; } = string.Empty;
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedUtc { get; set; } = DateTime.UtcNow;

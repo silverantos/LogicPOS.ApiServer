@@ -19,10 +19,53 @@ public sealed class DatabaseInitializer
         _dbContext = dbContext;
     }
 
-    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    public async Task<DatabaseInitializationResult> InitializeAsync(CancellationToken cancellationToken = default)
     {
+        if (await UsesExistingLogicPosSchemaAsync(cancellationToken))
+        {
+            return new DatabaseInitializationResult(true, false);
+        }
+
         await BaselineEnsureCreatedDatabaseAsync(cancellationToken);
         await _dbContext.Database.MigrateAsync(cancellationToken);
+        return new DatabaseInitializationResult(false, true);
+    }
+
+    private async Task<bool> UsesExistingLogicPosSchemaAsync(CancellationToken cancellationToken)
+    {
+        var connection = _dbContext.Database.GetDbConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        try
+        {
+            var requiredTables = new[]
+            {
+                "Articles",
+                "ArticleClasses",
+                "Orders",
+                "Documents",
+                "PaymentMethods",
+                "DocumentTypes",
+                "WorkSessionPeriods",
+                "Warehouses",
+                "Countries",
+                "Currencies"
+            };
+
+            foreach (var tableName in requiredTables)
+            {
+                if (!await TableExistsAsync(connection, tableName, cancellationToken))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        finally
+        {
+            await connection.CloseAsync();
+        }
     }
 
     private async Task BaselineEnsureCreatedDatabaseAsync(CancellationToken cancellationToken)
@@ -157,4 +200,6 @@ VALUES ($migrationId, $productVersion);";
     }
 
     private sealed record MigrationBaseline(string MigrationId, string[] RequiredTables);
+
+    public sealed record DatabaseInitializationResult(bool UsesExistingLogicPosSchema, bool MigrationsApplied);
 }
