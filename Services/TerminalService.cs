@@ -1,6 +1,7 @@
 using LogicPOS.ApiServer.Data;
 using LogicPOS.ApiServer.Data.Entities;
 using LogicPOS.ApiServer.DTOs;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace LogicPOS.ApiServer.Services;
@@ -60,7 +61,19 @@ public sealed class TerminalService
         };
 
         _dbContext.ApiTerminals.Add(terminal);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is SqliteException sqliteException
+            && sqliteException.SqliteErrorCode == 19
+            && sqliteException.Message.Contains("Terminals.CreatedBy", StringComparison.OrdinalIgnoreCase))
+        {
+            _dbContext.Entry(terminal).State = EntityState.Detached;
+            await _dbContext.Database.ExecuteSqlInterpolatedAsync($@"
+INSERT INTO ""Terminals"" (""Id"", ""Order"", ""Code"", ""Designation"", ""HardwareId"", ""TimerInterval"", ""IsDefault"", ""CreatedBy"", ""CreatedUtc"", ""UpdatedUtc"")
+VALUES ({terminal.Id}, {terminal.Order}, {terminal.Code}, {terminal.Designation}, {terminal.HardwareId}, {terminal.TimerInterval}, {terminal.IsDefault}, {Guid.Empty}, {terminal.CreatedUtc}, {terminal.UpdatedUtc});", cancellationToken);
+        }
 
         return new AddEntityIdResponse
         {

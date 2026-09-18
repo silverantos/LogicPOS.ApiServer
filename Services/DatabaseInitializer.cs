@@ -13,6 +13,20 @@ public sealed class DatabaseInitializer
     ];
 
     private readonly ApplicationDbContext _dbContext;
+    private static readonly string[] LogicPosAnchorTables = ["Terminals", "Articles", "Documents"];
+    private static readonly string[] LogicPosCoreTables =
+    [
+        "Terminals",
+        "Articles",
+        "Documents",
+        "PaymentMethods",
+        "DocumentTypes",
+        "WorkSessionPeriods",
+        "Warehouses",
+        "FiscalYears",
+        "Countries",
+        "Currencies"
+    ];
 
     public DatabaseInitializer(ApplicationDbContext dbContext)
     {
@@ -23,6 +37,7 @@ public sealed class DatabaseInitializer
     {
         if (await UsesExistingLogicPosSchemaAsync(cancellationToken))
         {
+            await CleanupApiArtifactsAsync(cancellationToken);
             return new DatabaseInitializationResult(true, false);
         }
 
@@ -38,29 +53,50 @@ public sealed class DatabaseInitializer
 
         try
         {
-            var requiredTables = new[]
-            {
-                "Articles",
-                "ArticleClasses",
-                "Orders",
-                "Documents",
-                "PaymentMethods",
-                "DocumentTypes",
-                "WorkSessionPeriods",
-                "Warehouses",
-                "Countries",
-                "Currencies"
-            };
+            var existingTables = await GetUserTableNamesAsync(connection, cancellationToken);
+            var anchorCount = LogicPosAnchorTables.Count(existingTables.Contains);
+            var coreCount = LogicPosCoreTables.Count(existingTables.Contains);
 
-            foreach (var tableName in requiredTables)
+            return anchorCount >= 2 || (anchorCount >= 1 && coreCount >= 3);
+        }
+        finally
+        {
+            await connection.CloseAsync();
+        }
+    }
+
+    private async Task CleanupApiArtifactsAsync(CancellationToken cancellationToken)
+    {
+        var connection = _dbContext.Database.GetDbConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        try
+        {
+            var userTables = await GetUserTableNamesAsync(connection, cancellationToken);
+            var apiTables = userTables
+                .Where(static tableName => tableName.StartsWith("Api", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            foreach (var apiTable in apiTables)
             {
-                if (!await TableExistsAsync(connection, tableName, cancellationToken))
-                {
-                    return false;
-                }
+                await using var dropTableCommand = connection.CreateCommand();
+                dropTableCommand.CommandText = $"DROP TABLE IF EXISTS {QuoteIdentifier(apiTable)};";
+                await dropTableCommand.ExecuteNonQueryAsync(cancellationToken);
             }
 
-            return true;
+            if (!userTables.Contains("__EFMigrationsHistory"))
+            {
+                return;
+            }
+
+            var ownMigrationIds = _dbContext.Database.GetMigrations().ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var existingMigrationIds = await GetMigrationIdsAsync(connection, cancellationToken);
+            if (existingMigrationIds.Count == 0 || existingMigrationIds.All(ownMigrationIds.Contains))
+            {
+                await using var dropHistoryCommand = connection.CreateCommand();
+                dropHistoryCommand.CommandText = "DROP TABLE IF EXISTS __EFMigrationsHistory;";
+                await dropHistoryCommand.ExecuteNonQueryAsync(cancellationToken);
+            }
         }
         finally
         {
@@ -182,7 +218,7 @@ VALUES ($migrationId, $productVersion);";
         command.Parameters.Add(parameter);
 
         var result = await command.ExecuteScalarAsync(cancellationToken);
-        return result is long count && count > 0;
+        return Convert.ToInt64(result) > 0;
     }
 
     private static async Task<bool> MigrationExistsAsync(System.Data.Common.DbConnection connection, string migrationId, CancellationToken cancellationToken)
@@ -196,7 +232,42 @@ VALUES ($migrationId, $productVersion);";
         command.Parameters.Add(parameter);
 
         var result = await command.ExecuteScalarAsync(cancellationToken);
-        return result is long count && count > 0;
+        return Convert.ToInt64(result) > 0;
+    }
+
+    private static async Task<HashSet<string>> GetUserTableNamesAsync(System.Data.Common.DbConnection connection, CancellationToken cancellationToken)
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
+
+        var tables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            tables.Add(reader.GetString(0));
+        }
+
+        return tables;
+    }
+
+    private static async Task<List<string>> GetMigrationIdsAsync(System.Data.Common.DbConnection connection, CancellationToken cancellationToken)
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT MigrationId FROM __EFMigrationsHistory;";
+
+        var migrations = new List<string>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            migrations.Add(reader.GetString(0));
+        }
+
+        return migrations;
+    }
+
+    private static string QuoteIdentifier(string identifier)
+    {
+        return $"\"{identifier.Replace("\"", "\"\"", StringComparison.Ordinal)}\"";
     }
 
     private sealed record MigrationBaseline(string MigrationId, string[] RequiredTables);
