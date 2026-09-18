@@ -1,0 +1,14 @@
+2026-09-18 16:19:15.823 +01:00 [INF] HTTP GET /scalar/v1 responded 404 in 24.7234 ms
+2026-09-18 16:19:22.859 +01:00 [INF] HTTP GET / responded 404 in 4.2610 ms
+2026-09-18 16:19:35.057 +01:00 [INF] HTTP GET / responded 404 in 14.2496 ms
+2026-09-18 16:19:36.398 +01:00 [INF] HTTP GET / responded 404 in 0.1765 ms
+2026-09-18 16:20:01.691 +01:00 [INF] HTTP GET /licensing/system/lastest-version responded 200 in 19.5726 ms
+2026-09-18 16:20:01.884 +01:00 [INF] HTTP GET /system/api-version responded 200 in 4.4109 ms
+2026-09-18 16:20:01.919 +01:00 [INF] HTTP GET /system/information responded 200 in 3.2898 ms
+2026-09-18 16:20:02.099 +01:00 [INF] HTTP GET /licensing/refresh responded 200 in 117.9030 ms
+2026-09-18 16:20:02.203 +01:00 [INF] HTTP GET /licensing/data responded 200 in 73.8949 ms
+2026-09-18 16:20:02.306 +01:00 [INF] HTTP GET /terminals/hardwareid/3C9EEBC8-5276-4C59-8FE9-E0D7DE722BBE responded 404 in 28.3069 ms
+2026-09-18 16:20:02.446 +01:00 [INF] HTTP POST /terminals/create responded 201 in 79.4066 ms
+2026-09-18 16:20:02.507 +01:00 [INF] HTTP GET /terminals/19046add-5d81-4eb1-b48a-c1aa6bde7c62 responded 200 in 25.6118 ms
+2026-09-18 16:20:02.558 +01:00 [INF] HTTP GET /licensing/connect responded 200 in 2.6275 ms
+2026-09-18 16:20:02.584 +01:00 [INF] HTTP GET /licensing/countries responded 200 in 2.3641 ms
