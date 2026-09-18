@@ -10,6 +10,7 @@ Esta API foi ajustada para trabalhar diretamente com uma base SQLite LogicPOS j�
 - Foram adicionados aliases de colunas para compatibilidade com nomes reais (ex.: `Button_Image`, `Price1_Value`, `Customer_Name`, `Tax_Percentage`, `CreatedAt`, `UpdatedAt`).
 - Foi aplicado filtro global de soft-delete (`IsDeleted = 0`) e conversão automática de `Delete` EF para soft-delete em entidades com `IsDeleted`.
 - O `DatabaseInitializer` deteta schema LogicPOS existente e **não** executa migrations nesse caso (evitando criação de tabelas `Api*`).
+- No arranque, quando é detetada uma base LogicPOS existente, a API executa cleanup conservador de artefactos antigos criados por versões anteriores (tabelas com prefixo `Api*` e `__EFMigrationsHistory` quando só contém migrations desta API).
 - O `ApplicationDbContextFactory` usa o mesmo fallback de runtime: `Data Source=logicpos.db`.
 
 ### Arranque
