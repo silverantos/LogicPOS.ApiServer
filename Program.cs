@@ -65,6 +65,7 @@ app.MapGet("/vat-rates", async (AppDbContext db) => Results.Ok(await db.VatRates
 
 app.MapSystemEndpoints();
 app.MapAuthEndpoints();
+app.MapPosEndpoints();
 
 app.Run();
 
