@@ -137,8 +137,8 @@ public static class PosEndpoints
         };
     }
 
-    private static string QuoteIdentifier(string identifier)
+      private static string QuoteIdentifier(string identifier)
     {
-        return $"\"{identifier.Replace("\"", "\"\"")}";
+        return $"\"{identifier.Replace("\"", "\"\"")}\"";
     }
 }
