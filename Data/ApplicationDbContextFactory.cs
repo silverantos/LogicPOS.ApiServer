@@ -14,7 +14,7 @@ public sealed class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Ap
             .AddEnvironmentVariables()
             .Build();
 
-        var connectionString = configuration.GetConnectionString("DefaultConnection") ?? "Data Source=logicpos-api.db";
+        var connectionString = configuration.GetConnectionString("DefaultConnection") ?? "Data Source=logicpos.db";
 
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
         optionsBuilder.UseSqlite(connectionString);
