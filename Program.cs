@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using LogicPOS.ApiServer.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,7 @@ app.MapGet("/licensing/data", () => new { status = "Active", edition = "Retail",
 app.MapGet("/users", async (AppDbContext db) => Results.Ok(await db.Users.ToListAsync()));
 app.MapGet("/terminals", async (AppDbContext db) => Results.Ok(await db.Terminals.ToListAsync()));
 app.MapGet("/vat-rates", async (AppDbContext db) => Results.Ok(await db.VatRates.ToListAsync()));
+app.MapSystemEndpoints();
 
 app.Run();
 
