@@ -1,0 +1,50 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code workspace files
+.history/
+
+# NuGet packages and generated files
+*.nupkg
+*.snupkg
+.nuget/
+
+# Test results and coverage
+TestResults/
+*.trx
+coverage/
+coverage-*.xml
+
+# Runtime logs
+Logs/*.txt
+*.log
+
+# Local databases and database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Local configuration and secrets
+appsettings.Local.json
+appsettings.*.Local.json
+secrets.json
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Publish output
+publish/
+wwwroot/
